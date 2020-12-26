@@ -12,20 +12,23 @@ import {
   Query,
   Redirect,
 } from '@nestjs/common';
+import { CatsService } from './cats.service';
 import { CreateCatDto, ListAllEntities, UpdateCatDto } from './dto';
+import { Cat } from './interfaces/cat-inderface';
 
 @Controller({ host: ':nestjs.lostbug.com', path: 'cats' })
 export class CatsController {
+  constructor(private catsService: CatsService) {}
   @Post()
   @HttpCode(204)
-  create(@Body() createCatDto: CreateCatDto): string {
-    return `This action adds new cat ${createCatDto.name}`;
+  async create(@Body() createCatDto: CreateCatDto) {
+    this.catsService.create(createCatDto);
   }
 
   @Get()
   @Header('Cache-Control', 'none')
-  async findAll(@Query() query: ListAllEntities): Promise<string> {
-    return `This action returns all cats (limit:${query.limit} items)`;
+  async findAll(@Query() query: ListAllEntities): Promise<Cat[]> {
+    return this.catsService.findAll();
   }
 
   @Get(':id')
