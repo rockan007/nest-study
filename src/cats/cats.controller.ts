@@ -16,7 +16,7 @@ import { CatsService } from './cats.service';
 import { CreateCatDto, ListAllEntities, UpdateCatDto } from './dto';
 import { Cat } from './interfaces/cat-inderface';
 
-@Controller({ host: ':nestjs.lostbug.com', path: 'cats' })
+@Controller('cats')
 export class CatsController {
   constructor(private catsService: CatsService) {}
   @Post()
