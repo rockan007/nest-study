@@ -6,17 +6,22 @@ import {
   Header,
   HostParam,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Put,
   Query,
   Redirect,
+  UseFilters,
 } from '@nestjs/common';
+import { HttpExceptionFilter } from 'src/common/exception-filters/http-exception.filter';
 import { CatsService } from './cats.service';
 import { CreateCatDto, ListAllEntities, UpdateCatDto } from './dto';
 import { Cat } from './interfaces/cat-inderface';
 
 @Controller('cats')
+@UseFilters(HttpExceptionFilter)
 export class CatsController {
   constructor(private catsService: CatsService) {}
   @Post()
@@ -26,8 +31,10 @@ export class CatsController {
   }
 
   @Get()
+  @UseFilters(HttpExceptionFilter)
   @Header('Cache-Control', 'none')
   async findAll(@Query() query: ListAllEntities): Promise<Cat[]> {
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     return this.catsService.findAll();
   }
 
