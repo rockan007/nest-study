@@ -1,6 +1,8 @@
+import Joi from '@hapi/joi';
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Header,
@@ -9,37 +11,47 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseBoolPipe,
   Post,
   Put,
   Query,
   Redirect,
   UseFilters,
+  UsePipes,
 } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/common/exception-filters/http-exception.filter';
+import { JoiValidtionPipe } from 'src/common/pipes/joi-validation.pipe';
+import { ParseIntPipe } from 'src/common/pipes/parse-in.pipe';
+import { ValidationPipe } from 'src/common/pipes/validation.pipe';
 import { CatsService } from './cats.service';
 import { CreateCatDto, ListAllEntities, UpdateCatDto } from './dto';
 import { Cat } from './interfaces/cat-inderface';
-
+const createCatSchema = Joi.object().keys({ username: Joi.string().min(3) });
 @Controller('cats')
 @UseFilters(HttpExceptionFilter)
 export class CatsController {
   constructor(private catsService: CatsService) {}
   @Post()
   @HttpCode(204)
-  async create(@Body() createCatDto: CreateCatDto) {
+  @UsePipes(new JoiValidtionPipe(createCatSchema))
+  async create(@Body(new ValidationPipe()) createCatDto: CreateCatDto) {
     this.catsService.create(createCatDto);
   }
 
   @Get()
   @UseFilters(HttpExceptionFilter)
   @Header('Cache-Control', 'none')
-  async findAll(@Query() query: ListAllEntities): Promise<Cat[]> {
-    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    return this.catsService.findAll();
+  async findAll(
+    @Query('activeOnly', new DefaultValuePipe(false), ParseBoolPipe)
+    activeOnly: boolean,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+  ): Promise<Cat[]> {
+    // throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    return this.catsService.findAll({ activeOnly, page });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): string {
+  findOne(@Param('id', ParseIntPipe) id: number): string {
     console.log(id);
     return `This action returns a #${id}cat`;
   }

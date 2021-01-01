@@ -1,4 +1,4 @@
-import { CreateCatDto } from './create-cat-dto';
+import { CreateCatDto } from './create-cat.dto';
 import { ListAllEntities } from './list-all-entities';
 import { UpdateCatDto } from './uodate-cat-dto';
 
